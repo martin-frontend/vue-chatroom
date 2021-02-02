@@ -1,5 +1,5 @@
 <template>
-    <div class="chatroom">
+    <div class="chatroom" @click="isShowEmoji = false">
       <!-- chatroom -->
       <nav class="navbar">
         <div class="user-count">
@@ -12,7 +12,7 @@
             <div class="message" :class="item.className" v-for="(item, index) in messages" :key="index">
               <div class="message-content">
                 <template v-if="item.className === 'left-message'">
-                  | {{ item.name }}
+                 {{ item.name }} | {{ item.message }}
                 </template>
                 <template v-if="item.className === 'middle-message'">
                   <img src="../assets/icons/anonymous-icon.svg" alt="">
@@ -20,15 +20,16 @@
                   - {{ item.name }}{{ item.message }} -
                 </template>
                 <template v-if="item.className === 'right-message'">
-                  {{ item.name }}
+                  {{ item.message }}
                 </template>
               </div>
             </div>
           </template>
         </div>
         <div class="toolbar">
-          <img src="../assets/icons/emoji-icon.svg" width="30" height="30" alt="">
+          <img @click.stop="isShowEmoji = !isShowEmoji" :class="{show:isShowEmoji}" src="../assets/icons/emoji-icon.svg" width="30" height="30" alt="">
           <img src="../assets/icons/addImage-icon.svg" width="30" height="30" alt="">
+          <Emoji v-if="isShowEmoji" />
         </div>
         <div class="message-input">
           <input v-model="text" type="text">
@@ -39,9 +40,13 @@
 </template>
 
 <script>
+import Emoji from '../components/Emoji'
 import { mapState } from 'vuex';
 export default {
   name: 'Chatroom',
+  components: {
+    Emoji
+  },
   data() {
     return {
       type: {
@@ -71,7 +76,8 @@ export default {
         // },
       ],
       text: '',
-      user: 0
+      user: 0,
+      isShowEmoji: false
     }
   },
   sockets: {
@@ -115,6 +121,9 @@ export default {
       }
       this.$socket.emit('msgToServer', record);
       this.text = ''
+    },
+    addEmoji(emoji) {
+      this.text += emoji
     }
   },
 }
@@ -138,18 +147,24 @@ export default {
     flex-direction: column;
     flex: 1;
     width: 80%;
+    padding: 5px;
     margin: auto auto 60px;
     .chat {
       display: flex;
       flex-direction: column;
-      overflow-y: auto;
+      overflow: auto;
       flex: 1 0 0;
       padding:  0 20px;
-      ::-webkit-scrollbar-thumb {
+      &::-webkit-scrollbar {
+        width: 10px;
+      }
+      &::-webkit-scrollbar-thumb {
         background-color: #5081ad;
         border-radius: 10px;
       }
-      // background: #000;
+      &::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
       .message {
         display: flex;
         &.left-message {
@@ -189,6 +204,10 @@ export default {
       align-items: center;
       img {
         margin: 10px;
+        cursor: pointer;
+      }
+      img.show {
+          opacity: .5;
       }
     }
     .message-input {
@@ -212,6 +231,7 @@ export default {
         right: 10px;
         opacity: .3;
         transition: opacity .5s;
+        cursor: pointer;
         &.light {
           opacity: 1;
         }
