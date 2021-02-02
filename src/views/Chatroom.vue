@@ -145,6 +145,10 @@ export default {
       overflow-y: auto;
       flex: 1 0 0;
       padding:  0 20px;
+      ::-webkit-scrollbar-thumb {
+        background-color: #5081ad;
+        border-radius: 10px;
+      }
       // background: #000;
       .message {
         display: flex;
