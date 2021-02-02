@@ -4,10 +4,13 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
  
 export default new Vuex.Store({
-    state: {},
+    state: {
+        name: ''
+    },
     mutations: {
-        "<MUTATION_PREFIX><EVENT_NAME>"() {
-            // do something
+        SET_NAME: (state, name) => {
+            console.log(123);
+            state.name = name
         }
     },
     actions: {
