@@ -12,10 +12,16 @@
             <div class="message" :class="item.className" v-for="(item, index) in messages" :key="index">
               <div class="message-content">
                 <template v-if="item.className === 'left-message'">
-                  {{ item.name }}
-                  <span style="color: gray"> | </span>
+                  | {{ item.name }}
                 </template>
-                {{ item.message }}
+                <template v-if="item.className === 'middle-message'">
+                  <img src="../assets/icons/anonymous-icon.svg" alt="">
+                  <br>
+                  - {{ item.name }}{{ item.message }} -
+                </template>
+                <template v-if="item.className === 'right-message'">
+                  {{ item.name }}
+                </template>
               </div>
             </div>
           </template>
@@ -137,7 +143,8 @@ export default {
       display: flex;
       flex-direction: column;
       overflow-y: auto;
-      flex: 1;
+      flex: 1 0 0;
+      padding:  0 20px;
       // background: #000;
       .message {
         display: flex;
@@ -151,6 +158,9 @@ export default {
         }
         &.middle-message {
           justify-content: center;
+          .message-content {
+            color: rgb(80,129,173);
+          }
         }
         &.right-message {
           justify-content: flex-end;
