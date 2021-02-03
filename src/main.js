@@ -5,6 +5,14 @@ import VueSocketIO from 'vue-socket.io'
 import './permission'
 import router from './router'
 import './assets/style/reset.css'
+import Viewer from 'v-viewer'
+import 'viewerjs/dist/viewer.css'
+Vue.use(Viewer, {
+  defaultOptions: {
+    zIndex: 9999,
+    toolbar: true
+  }
+})
 Vue.use(new VueSocketIO({
   debug: true,
   connection: 'http://localhost:3000',

@@ -147,7 +147,7 @@ export default {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-  bottom: 150px;
+  bottom: 160px;
   background-color: white;
   border-radius: 5px;
   h3 {
@@ -160,14 +160,26 @@ export default {
     border-top-right-radius: 5px;
   }
   .content {
-    width: 240px;
-    // height: 500px;
+    width: 205px;
+    height: 300px;
     display: flex;
     flex-wrap: wrap;
     background-color: white;
     padding: 15px;
+    margin: 3px;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
+    overflow: auto;
+    &::-webkit-scrollbar {
+      width: 5px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #5081ad;
+      border-radius: 10px;
+    }
+    &::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
     .wrap {
       width: 40px;
       height: 35px;

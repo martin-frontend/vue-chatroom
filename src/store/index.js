@@ -9,7 +9,6 @@ export default new Vuex.Store({
     },
     mutations: {
         SET_NAME: (state, name) => {
-            console.log(123);
             state.name = name
         }
     },

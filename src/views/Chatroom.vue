@@ -3,7 +3,9 @@
       <!-- chatroom -->
       <nav class="navbar">
         <div class="user-count">
-          {{ user }}
+          <img class="icon" src="../assets/icons/681494.svg" width="25" height="25" alt="">
+          <span class="count" v-if="users">{{ Object.keys(users).length }}</span>
+          <span class="name" v-for="(item,index) in users" :key="index">{{ item }}</span>
         </div>
       </nav>
       <div class="container">
@@ -13,7 +15,8 @@
               <template v-if="item.type === 'text' || item.type === 'system'">
                 <div class="message-content">
                   <template v-if="item.className === 'left-message'">
-                    {{ item.name }} | {{ item.message }}
+                    <div class="name">{{ item.name }}</div>
+                    {{ item.message }}
                   </template>
                   <template v-if="item.className === 'middle-message'">
                     <img src="../assets/icons/anonymous-icon.svg" alt="">
@@ -28,7 +31,9 @@
               <template v-if="item.type === 'img'">
                 <div class="message-content">
                   <div v-if="item.className === 'left-message'" class="name" style="text-align: left">{{ item.name }}</div>
-                  <img src="../assets/logo.png" alt="">
+                  <viewer :images="[item.message]">
+                    <img :src="item.message" alt="">
+                  </viewer>
                 </div>
               </template>
             </div>
@@ -84,7 +89,7 @@ export default {
         // },
       ],
       text: '',
-      user: 0,
+      users: null,
       isShowEmoji: false,
       fileElement: null
     }
@@ -95,20 +100,20 @@ export default {
     this.fileElement.addEventListener('change', this.uploadFile)
   },
   sockets: {
-    connect() {
-      console.log('socket connected')
-    },
-    customEmit(val) {
-      console.log(val,'this method was fired by the socket server. eg: io.emit("customEmit", data)')
-    },
+    // connect() {
+    //   console.log('socket connected')
+    // },
+    // customEmit(val) {
+    //   console.log(val,'this method was fired by the socket server. eg: io.emit("customEmit", data)')
+    // },
     msgToClient(data) {
-      // console.log('132', data.message);
       data.messages.forEach(element => {
         switch (element.type) {
           case 'system':
             this.$set(element ,'className', 'middle-message')
             break;
           case 'text':
+          case 'img':
             if(element.name === this.name){
               this.$set(element ,'className', 'right-message')
             }else {
@@ -117,6 +122,7 @@ export default {
             break;
         }
       });
+      this.users = data.users
       this.messages = data.messages
     }
   },
@@ -139,10 +145,16 @@ export default {
     addEmoji(emoji) {
       this.text += emoji
     },
-    uploadFile() {
-      console.dir(this.fileElement);
+    async uploadFile() {
       const file = this.fileElement.files.item(0)
-      console.log(file);
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      const getBase64 = await new Promise((resolve)=>{
+          fileReader.onload = (data) => {
+              resolve(data.target.result)
+          }
+      })
+      this.$socket.emit('sendImage', getBase64);
     }
   },
 }
@@ -152,7 +164,7 @@ export default {
 .chatroom {
   position: absolute;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   top: 0;
   left: 0;
   display: flex;
@@ -160,6 +172,41 @@ export default {
   .navbar {
     background-color: #5081ad;
     height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .user-count {
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      .icon {
+        opacity: .3;
+        margin-right: 15px;
+      }
+      .count {
+        // margin-left: 5px;
+        position: absolute;
+        width: 15px;
+        height: 15px;
+        font-size: 14px;
+        line-height: 15px;
+        text-align: center;
+        background: white;
+        color: #5081ad;
+        border-radius: 50%;
+        top: -6px;
+        left: 18px
+      }
+      .name {
+        padding: 2px 5px;
+        border-radius: 5px;
+        margin-right: 10px;
+        background: white;
+        color: #5081ad;
+      }
+    }
   }
   .container {
     display: flex;
@@ -168,12 +215,19 @@ export default {
     width: 80%;
     padding: 5px;
     margin: auto auto 60px;
+    @media (max-width:480px) {
+      width: 95%;
+      margin: auto;
+    }
     .chat {
       display: flex;
       flex-direction: column;
       overflow: auto;
       flex: 1 0 0;
       padding:  0 20px;
+      @media (max-width:480px) {
+        padding: 0 10px;
+      }
       &::-webkit-scrollbar {
         width: 10px;
       }
@@ -191,13 +245,16 @@ export default {
           .message-content {
             background-color: white;
             color: rgb(80,129,173);
-            border-radius: 7px;
+            border-radius: 20px;
+            text-align: left;
+            border-top-left-radius: 0px;
           }
         }
         &.middle-message {
           justify-content: center;
           .message-content {
             color: rgb(80,129,173);
+            font-weight: bold;
           }
         }
         &.right-message {
@@ -205,14 +262,26 @@ export default {
           .message-content {
             background-color: rgb(80,129,173);
             color: white;
-            border-radius: 7px;
+            border-radius: 20px;
+            text-align: right;
+            border-top-right-radius: 0px;
           }
         }
         .message-content {
           width: fit-content;
           padding: 10px;
           margin: 10px 0;
+          max-width: 400px;
           word-break: break-all;
+          line-height: 1.5;
+          .name {
+            color: rgb(80,129,173);
+            margin-bottom: 5px;
+            font-weight: 700;
+          }
+          img {
+            max-width: 250px;
+          }
         }
       }
     }
@@ -258,10 +327,4 @@ export default {
     }
   }
 }
-
-
-
-
-
-
 </style>
