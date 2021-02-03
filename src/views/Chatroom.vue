@@ -10,25 +10,33 @@
         <div class="chat">
           <template v-if="messages.length > 0">
             <div class="message" :class="item.className" v-for="(item, index) in messages" :key="index">
-              <div class="message-content">
-                <template v-if="item.className === 'left-message'">
-                 {{ item.name }} | {{ item.message }}
-                </template>
-                <template v-if="item.className === 'middle-message'">
-                  <img src="../assets/icons/anonymous-icon.svg" alt="">
-                  <br>
-                  - {{ item.name }}{{ item.message }} -
-                </template>
-                <template v-if="item.className === 'right-message'">
-                  {{ item.message }}
-                </template>
-              </div>
+              <template v-if="item.type === 'text' || item.type === 'system'">
+                <div class="message-content">
+                  <template v-if="item.className === 'left-message'">
+                    {{ item.name }} | {{ item.message }}
+                  </template>
+                  <template v-if="item.className === 'middle-message'">
+                    <img src="../assets/icons/anonymous-icon.svg" alt="">
+                    <br>
+                    - {{ item.name }}{{ item.message }} -
+                  </template>
+                  <template v-if="item.className === 'right-message'">
+                    {{ item.message }}
+                  </template>
+                </div>
+              </template>
+              <template v-if="item.type === 'img'">
+                <div class="message-content">
+                  <div v-if="item.className === 'left-message'" class="name" style="text-align: left">{{ item.name }}</div>
+                  <img src="../assets/logo.png" alt="">
+                </div>
+              </template>
             </div>
           </template>
         </div>
         <div class="toolbar">
           <img @click.stop="isShowEmoji = !isShowEmoji" :class="{show:isShowEmoji}" src="../assets/icons/emoji-icon.svg" width="30" height="30" alt="">
-          <img src="../assets/icons/addImage-icon.svg" width="30" height="30" alt="">
+          <img @click="fileElement.click()" src="../assets/icons/addImage-icon.svg" width="30" height="30" alt="">
           <Emoji v-if="isShowEmoji" />
         </div>
         <div class="message-input">
@@ -77,8 +85,14 @@ export default {
       ],
       text: '',
       user: 0,
-      isShowEmoji: false
+      isShowEmoji: false,
+      fileElement: null
     }
+  },
+  mounted () {
+    this.fileElement = document.createElement('input');
+    this.fileElement.setAttribute('type', 'file')
+    this.fileElement.addEventListener('change', this.uploadFile)
   },
   sockets: {
     connect() {
@@ -124,6 +138,11 @@ export default {
     },
     addEmoji(emoji) {
       this.text += emoji
+    },
+    uploadFile() {
+      console.dir(this.fileElement);
+      const file = this.fileElement.files.item(0)
+      console.log(file);
     }
   },
 }
